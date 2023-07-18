@@ -1,46 +1,52 @@
-import sys
-from PySide2.QtWidgets import QApplication
-from test_plotter import PlotterApp
+import pytest
+from PySide2.QtWidgets import QMessageBox
+from app_plotter import AppPlotter
+
+# Fixture to create an instance of AppPlotter for each test
+@pytest.fixture
+def app_plotter(qtbot):
+    app_plotter = AppPlotter()
+    qtbot.addWidget(app_plotter)
+    return app_plotter
 
 
-def test_plotter_input_validation(qtbot):
-    app = QApplication(sys.argv)
-    plotter = PlotterApp()
-    qtbot.addWidget(plotter)
-    plotter.show()
+# Test valid plotting
+def test_plot_valid_function_and_range(app_plotter, qtbot):
+    function = "x**2"
+    range_min = "0"
+    range_max = "5"
 
-    # Simulate clicking the Plot button without entering any data
-    qtbot.mouseClick(plotter.plot_button, Qt.LeftButton)
+    app_plotter.plot_function(function, range_min, range_max)
+    qtbot.waitForWindowShown(app_plotter)
 
-    # Check if a warning message box is displayed
-    warning_message_box = plotter.findChild(QMessageBox, "Input Error")
-    assert warning_message_box is not None
-    assert "Please enter all the required fields." in warning_message_box.text()
+    # Assert the plot is not empty
+    assert len(app_plotter.figure.axes) == 1
+    assert len(app_plotter.figure.axes[0].lines) == 1
 
-    # Close the warning message box
-    qtbot.mouseClick(warning_message_box.button(QMessageBox.Close), Qt.LeftButton)
+    # Assert the plot title and labels
+    assert app_plotter.figure.axes[0].get_title() == function
+    assert app_plotter.figure.axes[0].get_xlabel() == "x"
+    assert app_plotter.figure.axes[0].get_ylabel() == "y"
 
-    # Simulate entering invalid range values
-    qtbot.keyClicks(plotter.range_min_input, "2")
-    qtbot.keyClicks(plotter.range_max_input, "1")
-    qtbot.mouseClick(plotter.plot_button, Qt.LeftButton)
 
-    # Check if a logical error message box is displayed
-    logical_error_message_box = plotter.findChild(QMessageBox, "Logical Error")
-    assert logical_error_message_box is not None
-    assert "Enter logical values, the max must be greater than the minimum." in logical_error_message_box.text()
+# Test invalid inputs and error messages
+@pytest.mark.parametrize(
+    "function, range_min, range_max, error_msg",
+    [
+        ("x**2", "", "5", "Please enter all the required fields."),
+        ("x**2", "1", "a", "Invalid range values. Please enter numeric values."),
+        ("x**2", "5", "3", "Enter logical values, the max must be greater than the minimum."),
+        ("x^2", "1", "5", "Error occurred while plotting the equation. Please check the syntax"),
+    ],
+)
+def test_invalid_inputs_and_error_messages(app_plotter, qtbot, function, range_min, range_max, error_msg):
+    app_plotter.plot_function(function, range_min, range_max)
+    qtbot.waitForWindowShown(app_plotter)
 
-    # Close the logical error message box
-    qtbot.mouseClick(logical_error_message_box.button(QMessageBox.Close), Qt.LeftButton)
+    # Check if the error message dialog is shown
+    assert len(qtbot.get_captured_widgets()) > 0
+    last_widget = qtbot.get_captured_widgets()[-1]
+    assert isinstance(last_widget, QMessageBox)
+    assert last_widget.text() == error_msg
 
-    # Simulate entering valid inputs and clicking the Plot button
-    qtbot.keyClicks(plotter.function_input, "x**2")
-    qtbot.keyClicks(plotter.range_min_input, "0")
-    qtbot.keyClicks(plotter.range_max_input, "5")
-    qtbot.mouseClick(plotter.plot_button, Qt.LeftButton)
 
-    # Check if the plot was displayed
-    assert plotter.figure is not None
-
-    # Close the main window
-    plotter.close()
