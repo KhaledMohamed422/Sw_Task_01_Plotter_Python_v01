@@ -22,3 +22,6 @@ This is a simple function plotter application written in Python using PySide2 an
 - Input fields to enter the function of x and the range for plotting.
 - Error handling for invalid user inputs.
 - Plots the function using Matplotlib and displays the graph.
+
+## Snippets
+![image](https://github.com/KhaledMohamed422/Sw_Task_01_Plotter_Python_v01/assets/83197205/a4f865b9-b821-4327-a5c4-85f0eec3c24d)
