@@ -23,7 +23,7 @@ This is a simple function plotter application written in Python using PySide2 an
 - Error handling for invalid user inputs.
 - Plots the function using Matplotlib and displays the graph.
 
-## Snippets
+## Snapshots
 
 ![image](https://github.com/KhaledMohamed422/Sw_Task_01_Plotter_Python_v01/assets/83197205/56bcc575-65e2-46ba-92d6-46468dc54337)
 ![image](https://github.com/KhaledMohamed422/Sw_Task_01_Plotter_Python_v01/assets/83197205/e4b0ddcf-7515-4fd6-be2d-3002b9799871)
